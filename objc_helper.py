@@ -3,7 +3,7 @@ import re
 import time
 
 displ_re = re.compile('\[R(?P<regnum>\d+)')
-var_re = re.compile(', \[SP,#0x.*\+(?P<varname>\w+)\]')
+var_re = re.compile(', \[SP(?:,#|\+)0x.*\+(?P<varname>\w+)\]')
 
 def trace_param(ea, min_ea, op_type, op_val):
     '''
