@@ -77,6 +77,14 @@ def trace_param(ea, min_ea, op_type, op_val):
                         # Optimizations use LR as general reg
                         op_val = 14
                     else:
+                        # Got the final reference
+                        refs = list(idautils.DataRefsFrom(ea))
+                        if refs:
+                          while len(refs) > 0:
+                            far_ref = refs[0]
+                            refs = list(idautils.DataRefsFrom(refs[0]))
+                          return far_ref
+                          
                         try:
                             op_val = int(displ_re.search(idc.GetDisasm(ea)).group('regnum'))
                         except:
@@ -117,6 +125,7 @@ def fix_callgraph(msgsend, segname, class_param, sel_param):
         ea_call = xref.frm
         func_start = idc.GetFunctionAttr(ea_call, idc.FUNCATTR_START)
         if not func_start or func_start == idc.BADADDR:
+            print '%08x: BADADDR' % ea_call
             continue
         ea = ea_call
         method_name_ea = trace_param(ea, func_start, idc.o_reg, sel_param)
@@ -136,6 +145,7 @@ def fix_callgraph(msgsend, segname, class_param, sel_param):
             class_name = '_unk_class'
 
         if method_name == '_unk_method' and class_name == '_unk_class':
+            print '%08x: unknown method and class' % ea_call
             continue
 
         # Using this name convention, if the class and method
